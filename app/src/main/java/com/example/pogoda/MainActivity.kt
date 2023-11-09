@@ -5,6 +5,7 @@ import LocationHelper
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -28,65 +29,71 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pogoda.ui.theme.PogodaTheme
+import com.google.android.gms.location.LocationCallback
+import kotlinx.coroutines.delay
 import androidx.compose.ui.text.TextStyle as TextStyle1
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1234
 
 class MainActivity : ComponentActivity() {
-    private var locationName by mutableStateOf("Ładowanie...")
+
+    private var hasLocationPermission by mutableStateOf(false)
+
+
+    // Żądanie uprawnień do lokalizacji
     private fun requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        } else {
+            hasLocationPermission = true // Uprawnienia zostały już przyznane
         }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Pozwolenie zostało udzielone
-            } else {
-                // Pozwolenie zostało odrzucone
-            }
+            hasLocationPermission = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
+
+            Log.d("LocationHelper", "Przyznano")
+    }
+        else{
+            Log.d("LocationHelper", "Nie przyznano")
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //locationHelper = LocationHelper(this)
+        // Sprawdzanie i żądanie uprawnień do lokalizacji
         requestLocationPermission()
+
         setContent {
             PogodaTheme {
-                val viewModel: LocationViewModel = viewModel()
-                val locationName = viewModel.cityName.observeAsState(initial = "Ładowanie...").value
+                // Otrzymywanie nazwy lokalizacji z ViewModel
+                val viewModel: LocationViewModel by viewModel()
+                val locationName by viewModel.cityName.observeAsState(initial = "Ładowanie...")
 
-                val context = LocalContext.current // Przenieś to na zewnątrz LaunchedEffect
-
-//                LaunchedEffect(Unit) {
-//                    val locationHelper = LocationHelper(this@MainActivity)
-//
-//                    if (activity != null) {
-//                        val locationHelper = LocationHelper(activity)
-//
-//                        locationHelper.getCurrentLocation { location ->
-//                            location?.let {
-//                                viewModel.fetchCityName(51.1005, 17.0229)
-//                            }
-//                        }
-//                    } else {
-//                        Log.e("LocationHelper", "Failed to get Activity from context.")
-//                    }
-//                }
-
+                // Ustawianie UI
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
                     RainyBackground {
                         FourTexts(locationName = locationName)
                     }
+
+                    // Obsługa uprawnień i pobierania lokalizacji
+                    LocationPermissionHandler(hasLocationPermission) { location ->
+                        // Kiedy lokalizacja zostanie pobrana, zaktualizuj ViewModel
+                        location?.let {
+                            viewModel.fetchCityName(it.latitude, it.longitude)
+                        }
+                    }
                 }
             }
         }
+
 
     }
 }
@@ -156,3 +163,42 @@ fun FourTexts(locationName: String) {
 fun PreviewFourTexts() {
     //FourTexts()
 }
+
+@Composable
+fun LocationPermissionHandler(
+    hasPermission: Boolean,
+    onLocationFetched: (Location?) -> Unit // Callback do obsługi pobranej lokalizacji
+) {
+    val context = LocalContext.current
+    // Utwórz instancję ViewModel - zazwyczaj używa się tu ViewModelProvidera lub Hilt.
+    val locationViewModel: LocationViewModel = viewModel()
+
+    LaunchedEffect(hasPermission) {
+        if (hasPermission) {
+            // Pobierz lokalizację tylko wtedy, gdy uprawnienia są przyznane
+            val locationHelper = LocationHelper(context as Activity)
+            locationHelper.getCurrentLocation { location ->
+                if (location != null) { // Sprawdź czy lokalizacja nie jest null
+                    onLocationFetched(location) // Wywołanie callback z pobraną lokalizacją
+                    // Loguj szerokość i długość geograficzną
+                    Log.d("LocationHelper", "Nowa lokalizacja: szerokość=${location.latitude}, długość=${location.longitude}")
+
+                    // Wywołaj ViewModel aby uzyskać nazwę miasta na podstawie współrzędnych
+                    locationViewModel.fetchCityName(location.latitude, location.longitude)
+
+                    // Obserwuj nazwę miasta i zaloguj ją, gdy się zmieni
+                    val cityNameObserver = Observer<String> { cityName ->
+                        Log.d("LocationHelper", "Znalezione miasto: $cityName")
+                    }
+                    locationViewModel.cityName.observe(context as LifecycleOwner, cityNameObserver)
+                } else {
+                    Log.d("LocationHelper", "Lokalizacja nie została znaleziona")
+                }
+            }
+        } else {
+            Log.d("LocationHelper", "Brak uprawnień do lokalizacji")
+        }
+    }
+}
+
+
