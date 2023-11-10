@@ -75,21 +75,6 @@ class MainActivity : ComponentActivity() {
 
                 val context = LocalContext.current // Przenieś to na zewnątrz LaunchedEffect
 
-//                LaunchedEffect(Unit) {
-//                    val locationHelper = LocationHelper(this@MainActivity)
-//
-//                    if (activity != null) {
-//                        val locationHelper = LocationHelper(activity)
-//
-//                        locationHelper.getCurrentLocation { location ->
-//                            location?.let {
-//                                viewModel.fetchCityName(51.1005, 17.0229)
-//                            }
-//                        }
-//                    } else {
-//                        Log.e("LocationHelper", "Failed to get Activity from context.")
-//                    }
-//                }
 
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
                     RainyBackground {
@@ -97,7 +82,9 @@ class MainActivity : ComponentActivity() {
                     }
                     LocationPermissionHandler(hasLocationPermission) { location ->
                         // Kiedy lokalizacja zostanie pobrana, zaktualizuj ViewModel
-
+                        location?.let {
+                            viewModel.fetchCityName(it.latitude, it.longitude)
+                        }
                         }
                 }
             }
