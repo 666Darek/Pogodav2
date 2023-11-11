@@ -1,5 +1,6 @@
 package com.example.pogoda
 
+import GetWeather
 import androidx.compose.ui.platform.LocalContext
 import LocationHelper
 import android.Manifest
@@ -36,6 +37,9 @@ import com.example.pogoda.ui.theme.PogodaTheme
 import com.google.android.gms.location.LocationCallback
 import kotlinx.coroutines.delay
 import androidx.compose.ui.text.TextStyle as TextStyle1
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1234
 
@@ -68,13 +72,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestLocationPermission()
+        // Inicjalizacja GetWeather
+        val getWeather = GetWeather()
+
         setContent {
             PogodaTheme {
                 val viewModel: LocationViewModel = viewModel()
                 val locationName = viewModel.cityName.observeAsState(initial = "Ładowanie...").value
-
-                val context = LocalContext.current // Przenieś to na zewnątrz LaunchedEffect
-
+                // Uruchamiamy zapytanie pogodowe w LaunchedEffect
+                val getWeather = GetWeather()
 
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
                     RainyBackground {
@@ -87,6 +93,15 @@ class MainActivity : ComponentActivity() {
                         }
                         }
                 }
+                LaunchedEffect(Unit) {
+                    try {
+                        val weatherInfo = getWeather.fetchWeather("Warsaw")
+                        Log.d("PogodaDebug", weatherInfo)
+                    } catch (e: Exception) {
+                        Log.e("PogodaDebug", "Error fetching weather data", e)
+                    }
+                }
+
             }
         }
 
