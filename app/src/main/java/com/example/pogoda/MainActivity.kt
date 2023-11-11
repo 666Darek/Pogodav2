@@ -67,36 +67,34 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //locationHelper = LocationHelper(this)
-        // Sprawdzanie i żądanie uprawnień do lokalizacji
         requestLocationPermission()
-
         setContent {
             PogodaTheme {
-                // Otrzymywanie nazwy lokalizacji z ViewModel
-                val viewModel: LocationViewModel by viewModel()
-                val locationName by viewModel.cityName.observeAsState(initial = "Ładowanie...")
+                val viewModel: LocationViewModel = viewModel()
+                val locationName = viewModel.cityName.observeAsState(initial = "Ładowanie...").value
 
-                // Ustawianie UI
+                val context = LocalContext.current // Przenieś to na zewnątrz LaunchedEffect
+
+
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
                     RainyBackground {
                         FourTexts(locationName = locationName)
                     }
-
-                    // Obsługa uprawnień i pobierania lokalizacji
                     LocationPermissionHandler(hasLocationPermission) { location ->
                         // Kiedy lokalizacja zostanie pobrana, zaktualizuj ViewModel
                         location?.let {
                             viewModel.fetchCityName(it.latitude, it.longitude)
                         }
-                    }
+                        }
                 }
             }
         }
 
+    }
+
 
     }
-}
+
 
 
 
@@ -170,8 +168,6 @@ fun LocationPermissionHandler(
     onLocationFetched: (Location?) -> Unit // Callback do obsługi pobranej lokalizacji
 ) {
     val context = LocalContext.current
-    // Utwórz instancję ViewModel - zazwyczaj używa się tu ViewModelProvidera lub Hilt.
-    val locationViewModel: LocationViewModel = viewModel()
 
     LaunchedEffect(hasPermission) {
         if (hasPermission) {
@@ -182,15 +178,6 @@ fun LocationPermissionHandler(
                     onLocationFetched(location) // Wywołanie callback z pobraną lokalizacją
                     // Loguj szerokość i długość geograficzną
                     Log.d("LocationHelper", "Nowa lokalizacja: szerokość=${location.latitude}, długość=${location.longitude}")
-
-                    // Wywołaj ViewModel aby uzyskać nazwę miasta na podstawie współrzędnych
-                    locationViewModel.fetchCityName(location.latitude, location.longitude)
-
-                    // Obserwuj nazwę miasta i zaloguj ją, gdy się zmieni
-                    val cityNameObserver = Observer<String> { cityName ->
-                        Log.d("LocationHelper", "Znalezione miasto: $cityName")
-                    }
-                    locationViewModel.cityName.observe(context as LifecycleOwner, cityNameObserver)
                 } else {
                     Log.d("LocationHelper", "Lokalizacja nie została znaleziona")
                 }
