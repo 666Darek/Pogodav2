@@ -93,12 +93,14 @@ class MainActivity : ComponentActivity() {
                         }
                         }
                 }
-                LaunchedEffect(Unit) {
-                    try {
-                        val weatherInfo = getWeather.fetchWeather("Warsaw")
-                        Log.d("PogodaDebug", weatherInfo)
-                    } catch (e: Exception) {
-                        Log.e("PogodaDebug", "Error fetching weather data", e)
+                LaunchedEffect(locationName) {
+                    if (locationName != "Ładowanie...") {
+                        try {
+                            val weatherInfo = getWeather.fetchWeather(locationName)
+                            Log.d("PogodaDebug", weatherInfo)
+                        } catch (e: Exception) {
+                            Log.e("PogodaDebug", "Error fetching weather data", e)
+                        }
                     }
                 }
 
