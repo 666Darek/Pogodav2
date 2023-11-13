@@ -70,12 +70,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             PogodaTheme {
                 var temperature by remember { mutableStateOf("Oczekiwanie na dane...") }
+                var windInfo by remember { mutableStateOf("Oczekiwanie na dane o wietrze...") }
                 val viewModel: LocationViewModel = viewModel()
                 val locationName = viewModel.cityName.observeAsState(initial = "Ładowanie...").value
 
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
                     RainyBackground {
-                        FourTexts(locationName, temperature)
+                        FourTexts(locationName, temperature, windInfo)
                     }
                     LocationPermissionHandler(hasLocationPermission) { location ->
                         location?.let {
@@ -89,6 +90,7 @@ class MainActivity : ComponentActivity() {
                         try {
                             val weatherInfo = getWeather.fetchWeather(locationName)
                             temperature = extractTemperature(weatherInfo)
+                            windInfo = extractWindInfo(weatherInfo)
                         } catch (e: Exception) {
                             Log.e("PogodaDebug", "Error fetching weather data", e)
                         }
@@ -104,6 +106,12 @@ class MainActivity : ComponentActivity() {
         val matchResult = temperatureRegex.find(weatherInfo)
         return matchResult?.value ?: "Brak danych"
     }
+    private fun extractWindInfo(weatherInfo: String): String {
+        val windInfoRegex = Regex("\\d+km/h")
+        val matchResult = windInfoRegex.find(weatherInfo)
+        return matchResult?.value ?: "Brak danych o wietrze"
+    }
+
 }
 
 
@@ -131,7 +139,7 @@ fun PreviewRainyBackgroundWithTexts() {
 }
 
 @Composable
-fun FourTexts(locationName: String, temperature: String) {
+fun FourTexts(locationName: String, temperature: String, windInfo: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -146,7 +154,7 @@ fun FourTexts(locationName: String, temperature: String) {
         Spacer(modifier = Modifier.height(20.dp))
         BasicText(temperature, style = TextStyle1(fontSize = 24.sp, color = Color.White))
         Spacer(modifier = Modifier.height(20.dp))
-        BasicText("Tekst 3", style = TextStyle1(fontSize = 24.sp, color = Color.White /* , fontFamily = customFontFamily */))
+        BasicText(windInfo, style = TextStyle1(fontSize = 24.sp, color = Color.White /* , fontFamily = customFontFamily */))
         Spacer(modifier = Modifier.height(20.dp))
         BasicText("Tekst 4", style = TextStyle1(fontSize = 24.sp, color = Color.White /* , fontFamily = customFontFamily */))
     }
