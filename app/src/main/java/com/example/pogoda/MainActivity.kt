@@ -71,12 +71,14 @@ class MainActivity : ComponentActivity() {
             PogodaTheme {
                 var temperature by remember { mutableStateOf("Oczekiwanie na dane...") }
                 var windInfo by remember { mutableStateOf("Oczekiwanie na dane o wietrze...") }
+                var humidity by remember { mutableStateOf("Oczekiwanie na dane o wilgotności...") }
+                var pressure by remember { mutableStateOf("Oczekiwanie na dane o ciśnieniu...") }
                 val viewModel: LocationViewModel = viewModel()
                 val locationName = viewModel.cityName.observeAsState(initial = "Ładowanie...").value
 
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
                     RainyBackground {
-                        FourTexts(locationName, temperature, windInfo)
+                        FourTexts(locationName, temperature, windInfo, humidity, pressure)
                     }
                     LocationPermissionHandler(hasLocationPermission) { location ->
                         location?.let {
@@ -91,6 +93,8 @@ class MainActivity : ComponentActivity() {
                             val weatherInfo = getWeather.fetchWeather(locationName)
                             temperature = extractTemperature(weatherInfo)
                             windInfo = extractWindInfo(weatherInfo)
+                            humidity = extractHumidity(weatherInfo)
+                            pressure = extractPressure(weatherInfo)
                         } catch (e: Exception) {
                             Log.e("PogodaDebug", "Error fetching weather data", e)
                         }
@@ -111,7 +115,17 @@ class MainActivity : ComponentActivity() {
         val matchResult = windInfoRegex.find(weatherInfo)
         return matchResult?.value ?: "Brak danych o wietrze"
     }
+    fun extractHumidity(weatherInfo: String): String {
+        val humidityRegex = Regex("\\d+%")
+        val matchResult = humidityRegex.find(weatherInfo)
+        return matchResult?.value ?: "Brak danych o wilgotności"
+    }
 
+    fun extractPressure(weatherInfo: String): String {
+        val pressureRegex = Regex("\\d+hPa")
+        val matchResult = pressureRegex.find(weatherInfo)
+        return matchResult?.value ?: "Brak danych o ciśnieniu"
+    }
 }
 
 
@@ -139,7 +153,7 @@ fun PreviewRainyBackgroundWithTexts() {
 }
 
 @Composable
-fun FourTexts(locationName: String, temperature: String, windInfo: String) {
+fun FourTexts(locationName: String, temperature: String, windInfo: String, humidity: String, pressure: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -156,7 +170,9 @@ fun FourTexts(locationName: String, temperature: String, windInfo: String) {
         Spacer(modifier = Modifier.height(20.dp))
         BasicText(windInfo, style = TextStyle1(fontSize = 24.sp, color = Color.White /* , fontFamily = customFontFamily */))
         Spacer(modifier = Modifier.height(20.dp))
-        BasicText("Tekst 4", style = TextStyle1(fontSize = 24.sp, color = Color.White /* , fontFamily = customFontFamily */))
+        BasicText(humidity, style = TextStyle1(fontSize = 24.sp, color = Color.White /* , fontFamily = customFontFamily */))
+        Spacer(modifier = Modifier.height(20.dp))
+        BasicText(pressure, style = TextStyle1(fontSize = 24.sp, color = Color.White /* , fontFamily = customFontFamily */))
     }
 }
 

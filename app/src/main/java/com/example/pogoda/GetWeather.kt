@@ -19,7 +19,7 @@ class GetWeather {
     private val wttrService = retrofit.create(WttrService::class.java)
 
     suspend fun fetchWeather(location: String): String {
-        val format = "$location?format=%c+%t+%w"
+        val format = "$location?format=%c+%t+%w+%h+%P"
         return wttrService.getWeather(format)
     }
 }
