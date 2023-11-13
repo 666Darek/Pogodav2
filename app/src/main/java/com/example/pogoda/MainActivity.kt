@@ -47,13 +47,11 @@ class MainActivity : ComponentActivity() {
 
     private var hasLocationPermission by mutableStateOf(false)
 
-
-    // Żądanie uprawnień do lokalizacji
     private fun requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
         } else {
-            hasLocationPermission = true // Uprawnienia zostały już przyznane
+            hasLocationPermission = true
         }
     }
 
@@ -61,72 +59,54 @@ class MainActivity : ComponentActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             hasLocationPermission = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
-
-            Log.d("LocationHelper", "Przyznano")
-    }
-        else{
-            Log.d("LocationHelper", "Nie przyznano")
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestLocationPermission()
-        // Inicjalizacja GetWeather
         val getWeather = GetWeather()
 
         setContent {
             PogodaTheme {
+                var temperature by remember { mutableStateOf("Oczekiwanie na dane...") }
                 val viewModel: LocationViewModel = viewModel()
                 val locationName = viewModel.cityName.observeAsState(initial = "Ładowanie...").value
-                // Uruchamiamy zapytanie pogodowe w LaunchedEffect
-                val getWeather = GetWeather()
 
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
                     RainyBackground {
-                        FourTexts(locationName = locationName)
+                        FourTexts(locationName, temperature)
                     }
                     LocationPermissionHandler(hasLocationPermission) { location ->
-                        // Kiedy lokalizacja zostanie pobrana, zaktualizuj ViewModel
                         location?.let {
                             viewModel.fetchCityName(it.latitude, it.longitude)
                         }
-                        }
+                    }
                 }
+
                 LaunchedEffect(locationName) {
                     if (locationName != "Ładowanie...") {
                         try {
                             val weatherInfo = getWeather.fetchWeather(locationName)
-                            Log.d("PogodaDebug", weatherInfo)
+                            temperature = extractTemperature(weatherInfo)
                         } catch (e: Exception) {
                             Log.e("PogodaDebug", "Error fetching weather data", e)
                         }
                     }
                 }
-
             }
         }
-
     }
 
-
-    }
-
-
-
-
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    PogodaTheme {
-        Greeting("Android")
+    private fun extractTemperature(weatherInfo: String): String {
+        // Prosta logika do wyciągnięcia temperatury z odpowiedzi
+        val temperatureRegex = Regex("(-?\\d+°C)")
+        val matchResult = temperatureRegex.find(weatherInfo)
+        return matchResult?.value ?: "Brak danych"
     }
 }
+
+
 @Composable
 fun RainyBackground(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(
@@ -151,20 +131,20 @@ fun PreviewRainyBackgroundWithTexts() {
 }
 
 @Composable
-fun FourTexts(locationName: String) {
+fun FourTexts(locationName: String, temperature: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally  // Dodane wyrównanie w poziomie
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         BasicText(locationName, style = TextStyle1(
             fontSize = 24.sp,
-            color = Color.White /* , fontFamily = customFontFamily */
+            color = Color.White
         ))
         Spacer(modifier = Modifier.height(20.dp))
-        BasicText("Tekst 2", style = TextStyle1(fontSize = 24.sp, color = Color.White /* , fontFamily = customFontFamily */))
+        BasicText(temperature, style = TextStyle1(fontSize = 24.sp, color = Color.White))
         Spacer(modifier = Modifier.height(20.dp))
         BasicText("Tekst 3", style = TextStyle1(fontSize = 24.sp, color = Color.White /* , fontFamily = customFontFamily */))
         Spacer(modifier = Modifier.height(20.dp))
