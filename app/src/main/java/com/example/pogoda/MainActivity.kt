@@ -157,10 +157,15 @@ fun FourTexts(locationName: String, temperature: String, windInfo: String, humid
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
+            .padding(top = 16.dp, start = 16.dp, end = 16.dp),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        BasicText("Pogoda", style = TextStyle1(
+            fontSize = 72.sp,
+            color = Color.White
+        ))
+        Spacer(modifier = Modifier.height(150.dp)) // Dostosuj odstęp według potrzeb
         BasicText(locationName, style = TextStyle1(
             fontSize = 24.sp,
             color = Color.White
@@ -168,13 +173,16 @@ fun FourTexts(locationName: String, temperature: String, windInfo: String, humid
         Spacer(modifier = Modifier.height(20.dp))
         BasicText(temperature, style = TextStyle1(fontSize = 24.sp, color = Color.White))
         Spacer(modifier = Modifier.height(20.dp))
-        BasicText(windInfo, style = TextStyle1(fontSize = 24.sp, color = Color.White /* , fontFamily = customFontFamily */))
+        BasicText(windInfo, style = TextStyle1(fontSize = 24.sp, color = Color.White))
         Spacer(modifier = Modifier.height(20.dp))
-        BasicText(humidity, style = TextStyle1(fontSize = 24.sp, color = Color.White /* , fontFamily = customFontFamily */))
+        BasicText(humidity, style = TextStyle1(fontSize = 24.sp, color = Color.White))
         Spacer(modifier = Modifier.height(20.dp))
-        BasicText(pressure, style = TextStyle1(fontSize = 24.sp, color = Color.White /* , fontFamily = customFontFamily */))
+        BasicText(pressure, style = TextStyle1(fontSize = 24.sp, color = Color.White))
+        // ... inne elementy, jeśli są potrzebne ...
     }
 }
+
+
 
 
 @Preview(showBackground = true)
