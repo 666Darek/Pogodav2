@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity() {
                 val locationName = viewModel.cityName.observeAsState(initial = "Ładowanie...").value
 
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-                    RainyBackground {
+                    SunnyBackground {
                         FourTexts(locationName, temperature, windInfo, humidity, pressure)
                     }
                     LocationPermissionHandler(hasLocationPermission) { location ->
@@ -136,6 +136,21 @@ fun RainyBackground(modifier: Modifier = Modifier, content: @Composable () -> Un
     ) {
         Image(
             painter = painterResource(id = R.drawable.backgroundrainy),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+        content()
+    }
+}
+
+@Composable
+fun SunnyBackground(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    Box(
+        modifier = modifier.fillMaxSize()
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.sunnybackground),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
