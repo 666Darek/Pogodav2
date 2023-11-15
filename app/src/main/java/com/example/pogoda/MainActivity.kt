@@ -91,10 +91,20 @@ class MainActivity : ComponentActivity() {
                     if (locationName != "Ładowanie...") {
                         try {
                             val weatherInfo = getWeather.fetchWeather(locationName)
+                            val emoji = extractEmoji(weatherInfo)
+                            Log.d("PogodaEmoji", "Emotka pogody: $emoji")
+                            if(emoji == "⛅")
+                            {
+                                Log.d("PogodaEmoji", "Wykrył pochmurno")
+                            }
+                            else{
+                                Log.d("PogodaEmoji", "Nie wykrył")
+                            }
                             temperature = extractTemperature(weatherInfo)
                             windInfo = extractWindInfo(weatherInfo)
                             humidity = extractHumidity(weatherInfo)
                             pressure = extractPressure(weatherInfo)
+
                         } catch (e: Exception) {
                             Log.e("PogodaDebug", "Error fetching weather data", e)
                         }
@@ -126,6 +136,13 @@ class MainActivity : ComponentActivity() {
         val matchResult = pressureRegex.find(weatherInfo)
         return matchResult?.value ?: "Brak danych o ciśnieniu"
     }
+    // Funkcja do ekstrakcji emotki z odpowiedzi pogodowej
+    private fun extractEmoji(weatherInfo: String): String {
+        val emojiRegex = Regex("[\u263a-\u27bf]|[\ud83c-\ud83c][\udf00-\udfff]|[\ud83d-\ud83d][\udc00-\ude4f]|[\ud83d-\ud83d][\ude80-\udeff]")
+        val matchResult = emojiRegex.find(weatherInfo)
+        return matchResult?.value ?: ""
+    }
+
 }
 
 

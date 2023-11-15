@@ -19,7 +19,7 @@ class GetWeather {
     private val wttrService = retrofit.create(WttrService::class.java)
 
     suspend fun fetchWeather(location: String): String {
-        val format = "$location?format=%c+%t+%w+%h+%P"
+        val format = "$location?format=%c+%t+%w+%h+%P"  //Wzrór zapytania: https://wttr.in/Wroclaw?format=%c+%t+%w+%h+%P
         return wttrService.getWeather(format)
     }
 }
