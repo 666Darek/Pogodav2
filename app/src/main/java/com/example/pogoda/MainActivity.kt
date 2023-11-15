@@ -186,13 +186,13 @@ fun FourTexts(locationName: String, temperature: String, windInfo: String, humid
             color = Color.White
         ))
         Spacer(modifier = Modifier.height(20.dp))
-        BasicText(temperature, style = TextStyle1(fontSize = 24.sp, color = Color.White))
+        BasicText("Temperatura: $temperature", style = TextStyle1(fontSize = 24.sp, color = Color.White))
         Spacer(modifier = Modifier.height(20.dp))
-        BasicText(windInfo, style = TextStyle1(fontSize = 24.sp, color = Color.White))
+        BasicText("Wiatr: $windInfo", style = TextStyle1(fontSize = 24.sp, color = Color.White))
         Spacer(modifier = Modifier.height(20.dp))
-        BasicText(humidity, style = TextStyle1(fontSize = 24.sp, color = Color.White))
+        BasicText("Wilgotność: $humidity", style = TextStyle1(fontSize = 24.sp, color = Color.White))
         Spacer(modifier = Modifier.height(20.dp))
-        BasicText(pressure, style = TextStyle1(fontSize = 24.sp, color = Color.White))
+        BasicText("Ciśnienie: $pressure", style = TextStyle1(fontSize = 24.sp, color = Color.White))
         // ... inne elementy, jeśli są potrzebne ...
     }
 }
