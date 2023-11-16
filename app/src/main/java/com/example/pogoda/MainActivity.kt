@@ -14,6 +14,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -69,49 +70,64 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             PogodaTheme {
+                // Zmienne stanów
                 var temperature by remember { mutableStateOf("Oczekiwanie na dane...") }
                 var windInfo by remember { mutableStateOf("Oczekiwanie na dane o wietrze...") }
                 var humidity by remember { mutableStateOf("Oczekiwanie na dane o wilgotności...") }
                 var pressure by remember { mutableStateOf("Oczekiwanie na dane o ciśnieniu...") }
+                var isDataLoaded by remember { mutableStateOf(false) }
+                var backgroundType by remember { mutableStateOf("Sunny") }
+
                 val viewModel: LocationViewModel = viewModel()
                 val locationName = viewModel.cityName.observeAsState(initial = "Ładowanie...").value
-
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-                    SunnyBackground {
-                        FourTexts(locationName, temperature, windInfo, humidity, pressure)
-                    }
-                    LocationPermissionHandler(hasLocationPermission) { location ->
-                        location?.let {
-                            viewModel.fetchCityName(it.latitude, it.longitude)
-                        }
-                    }
-                }
 
                 LaunchedEffect(locationName) {
                     if (locationName != "Ładowanie...") {
                         try {
                             val weatherInfo = getWeather.fetchWeather(locationName)
                             val emoji = extractEmoji(weatherInfo)
+
+                            // Logowanie i aktualizacja stanów
                             Log.d("PogodaEmoji", "Emotka pogody: $emoji")
-                            if(emoji == "⛅")
-                            {
-                                Log.d("PogodaEmoji", "Wykrył pochmurno")
-                            }
-                            else{
-                                Log.d("PogodaEmoji", "Nie wykrył")
-                            }
+                            Log.d("PogodaEmoji", "Zapytanie: $weatherInfo")
+                            isDataLoaded = true
+                            backgroundType = if (emoji == "🌧️") "Rainy" else "Sunny"
+                            //backgroundType = if (emoji == "⛅️") "Rainy" else "Sunny"
+                            Log.d("PogodaEmoji", "BackGroundType: $backgroundType")
+                            // Ekstrakcja danych pogodowych
                             temperature = extractTemperature(weatherInfo)
                             windInfo = extractWindInfo(weatherInfo)
                             humidity = extractHumidity(weatherInfo)
                             pressure = extractPressure(weatherInfo)
-
                         } catch (e: Exception) {
                             Log.e("PogodaDebug", "Error fetching weather data", e)
                         }
                     }
                 }
+                LocationPermissionHandler(hasLocationPermission) { location ->
+                    location?.let {
+                        viewModel.fetchCityName(it.latitude, it.longitude)
+                    }
+                }
+                if (isDataLoaded) {
+                    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
+                        if (backgroundType == "Rainy") {
+                            RainyBackground {
+                                FourTexts(locationName, temperature, windInfo, humidity, pressure)
+                            }
+                        } else {
+                            SunnyBackground {
+                                FourTexts(locationName, temperature, windInfo, humidity, pressure)
+                            }
+                        }
+                    }
+                } else {
+                    // UI wyświetlane podczas ładowania danych
+                    CircularProgressIndicator()
+                }
             }
         }
+
     }
 
     private fun extractTemperature(weatherInfo: String): String {
@@ -138,7 +154,8 @@ class MainActivity : ComponentActivity() {
     }
     // Funkcja do ekstrakcji emotki z odpowiedzi pogodowej
     private fun extractEmoji(weatherInfo: String): String {
-        val emojiRegex = Regex("[\u263a-\u27bf]|[\ud83c-\ud83c][\udf00-\udfff]|[\ud83d-\ud83d][\udc00-\ude4f]|[\ud83d-\ud83d][\ude80-\udeff]")
+        //val emojiRegex = Regex("\uD83C\uDF26")
+        val emojiRegex = Regex("\uD83C\uDF27|⛅️")
         val matchResult = emojiRegex.find(weatherInfo)
         return matchResult?.value ?: ""
     }

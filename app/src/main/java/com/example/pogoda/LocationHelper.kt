@@ -15,8 +15,8 @@ class LocationHelper(private val activity: Activity) {
     private val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity)
     private var locationCallback: LocationCallback? = null // Referencja do LocationCallback
     private val locationRequest = LocationRequest.create().apply {
-        interval = 60000 // 10 minut między aktualizacjami
-        fastestInterval = 300000 // 5 minut jako najszybszy interwał, ale używane tylko w razie potrzeby
+        interval = 6 // 10 minut między aktualizacjami
+        fastestInterval = 3 // 5 minut jako najszybszy interwał, ale używane tylko w razie potrzeby
         priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
@@ -48,8 +48,8 @@ class LocationHelper(private val activity: Activity) {
 
             // Tworzenie obiektu LocationRequest z odpowiednimi parametrami
             val locationRequest = LocationRequest.create().apply {
-                interval = 60000 // 10 minut między aktualizacjami
-                fastestInterval = 5000 // 5 sekund jako najszybszy interwał, dla przypadku gdy inne aplikacje aktualizują lokalizację
+                interval = 6 // 10 minut między aktualizacjami
+                fastestInterval = 5 // 5 sekund jako najszybszy interwał, dla przypadku gdy inne aplikacje aktualizują lokalizację
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
             }
 
