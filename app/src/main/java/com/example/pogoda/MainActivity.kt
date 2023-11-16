@@ -21,6 +21,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
@@ -225,7 +226,10 @@ fun SearchBar() {
                 OutlinedTextField(
                     value = searchText,
                     onValueChange = { searchText = it },
-                    label = { Text("Szukaj") }
+                    label = { Text("Szukaj") },
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        backgroundColor = Color.White
+                    )
                 )
             }
 
