@@ -255,7 +255,7 @@ fun FourTexts(locationName: String, temperature: String, windInfo: String, humid
     ) {
         BasicText("Pogoda", style = TextStyle1(
             fontSize = 72.sp,
-            color = Color.White
+            color = Color(0xFF6A5ACD)
         ))
         Spacer(modifier = Modifier.height(150.dp))
         BasicText(locationName, style = TextStyle1(
