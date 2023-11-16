@@ -15,9 +15,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -111,10 +114,12 @@ class MainActivity : ComponentActivity() {
                         if (backgroundType == "Rainy") {
                             RainyBackground {
                                 FourTexts(locationName, temperature, windInfo, humidity, pressure)
+                                SearchIconTopRight()
                             }
                         } else {
                             SunnyBackground {
                                 FourTexts(locationName, temperature, windInfo, humidity, pressure)
+                                SearchIconTopRight()
                             }
                         }
                     }
@@ -192,6 +197,16 @@ fun SunnyBackground(modifier: Modifier = Modifier, content: @Composable () -> Un
 fun PreviewRainyBackgroundWithTexts() {
     RainyBackground {
        // FourTexts()
+    }
+}
+@Composable
+fun SearchIconTopRight() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
+        Icon(
+            imageVector = Icons.Filled.Search,
+            contentDescription = "Search",
+            modifier = Modifier.padding(16.dp) // Ustaw odpowiedni padding
+        )
     }
 }
 
