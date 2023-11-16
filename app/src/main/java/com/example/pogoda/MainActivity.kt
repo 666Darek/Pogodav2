@@ -12,11 +12,13 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -114,12 +116,14 @@ class MainActivity : ComponentActivity() {
                         if (backgroundType == "Rainy") {
                             RainyBackground {
                                 FourTexts(locationName, temperature, windInfo, humidity, pressure)
-                                SearchIconTopRight()
+                                //SearchIconTopRight()
+                                SearchBar()
                             }
                         } else {
                             SunnyBackground {
                                 FourTexts(locationName, temperature, windInfo, humidity, pressure)
-                                SearchIconTopRight()
+                                //SearchIconTopRight()
+                                SearchBar()
                             }
                         }
                     }
@@ -207,6 +211,32 @@ fun SearchIconTopRight() {
             contentDescription = "Search",
             modifier = Modifier.padding(16.dp) // Ustaw odpowiedni padding
         )
+    }
+}
+
+@Composable
+fun SearchBar() {
+    var isSearchVisible by remember { mutableStateOf(false) }
+    var searchText by remember { mutableStateOf("") }
+
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (isSearchVisible) {
+                OutlinedTextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    label = { Text("Szukaj") }
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Filled.Search,
+                contentDescription = "Search",
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clickable { isSearchVisible = !isSearchVisible }
+            )
+        }
     }
 }
 
