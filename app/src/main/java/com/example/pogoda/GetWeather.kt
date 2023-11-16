@@ -3,13 +3,13 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-// Definicja interfejsu dla Retrofit
+
 interface WttrService {
     @GET("/")
     suspend fun getWeather(@Query("format") format: String): String
 }
 
-// Klasa GetWeather
+
 class GetWeather {
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://wttr.in/")

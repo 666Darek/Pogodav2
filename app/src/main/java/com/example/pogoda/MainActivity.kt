@@ -86,15 +86,12 @@ class MainActivity : ComponentActivity() {
                         try {
                             val weatherInfo = getWeather.fetchWeather(locationName)
                             val emoji = extractEmoji(weatherInfo)
-
-                            // Logowanie i aktualizacja stanów
                             Log.d("PogodaEmoji", "Emotka pogody: $emoji")
                             Log.d("PogodaEmoji", "Zapytanie: $weatherInfo")
                             isDataLoaded = true
                             backgroundType = if (emoji == "🌧️") "Rainy" else "Sunny"
                             //backgroundType = if (emoji == "⛅️") "Rainy" else "Sunny"
                             Log.d("PogodaEmoji", "BackGroundType: $backgroundType")
-                            // Ekstrakcja danych pogodowych
                             temperature = extractTemperature(weatherInfo)
                             windInfo = extractWindInfo(weatherInfo)
                             humidity = extractHumidity(weatherInfo)
@@ -122,7 +119,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 } else {
-                    // UI wyświetlane podczas ładowania danych
                     CircularProgressIndicator()
                 }
             }
@@ -131,7 +127,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun extractTemperature(weatherInfo: String): String {
-        // Prosta logika do wyciągnięcia temperatury z odpowiedzi
         val temperatureRegex = Regex("(-?\\d+°C)")
         val matchResult = temperatureRegex.find(weatherInfo)
         return matchResult?.value ?: "Brak danych"
@@ -152,7 +147,6 @@ class MainActivity : ComponentActivity() {
         val matchResult = pressureRegex.find(weatherInfo)
         return matchResult?.value ?: "Brak danych o ciśnieniu"
     }
-    // Funkcja do ekstrakcji emotki z odpowiedzi pogodowej
     private fun extractEmoji(weatherInfo: String): String {
         //val emojiRegex = Regex("\uD83C\uDF26")
         val emojiRegex = Regex("\uD83C\uDF27|⛅️")
@@ -214,7 +208,7 @@ fun FourTexts(locationName: String, temperature: String, windInfo: String, humid
             fontSize = 72.sp,
             color = Color.White
         ))
-        Spacer(modifier = Modifier.height(150.dp)) // Dostosuj odstęp według potrzeb
+        Spacer(modifier = Modifier.height(150.dp))
         BasicText(locationName, style = TextStyle1(
             fontSize = 24.sp,
             color = Color.White
@@ -227,7 +221,6 @@ fun FourTexts(locationName: String, temperature: String, windInfo: String, humid
         BasicText("Wilgotność: $humidity", style = TextStyle1(fontSize = 24.sp, color = Color.White))
         Spacer(modifier = Modifier.height(20.dp))
         BasicText("Ciśnienie: $pressure", style = TextStyle1(fontSize = 24.sp, color = Color.White))
-        // ... inne elementy, jeśli są potrzebne ...
     }
 }
 
@@ -243,18 +236,16 @@ fun PreviewFourTexts() {
 @Composable
 fun LocationPermissionHandler(
     hasPermission: Boolean,
-    onLocationFetched: (Location?) -> Unit // Callback do obsługi pobranej lokalizacji
+    onLocationFetched: (Location?) -> Unit
 ) {
     val context = LocalContext.current
 
     LaunchedEffect(hasPermission) {
         if (hasPermission) {
-            // Pobierz lokalizację tylko wtedy, gdy uprawnienia są przyznane
             val locationHelper = LocationHelper(context as Activity)
             locationHelper.getCurrentLocation { location ->
-                if (location != null) { // Sprawdź czy lokalizacja nie jest null
-                    onLocationFetched(location) // Wywołanie callback z pobraną lokalizacją
-                    // Loguj szerokość i długość geograficzną
+                if (location != null) {
+                    onLocationFetched(location)
                     Log.d("LocationHelper", "Nowa lokalizacja: szerokość=${location.latitude}, długość=${location.longitude}")
                 } else {
                     Log.d("LocationHelper", "Lokalizacja nie została znaleziona")
